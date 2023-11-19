@@ -27,6 +27,7 @@ class Queue:
         self.server_status = 0
 
     def process(self):
+        print(f"Processing at {self.env.now}, {self.mu}")
         self.times_of_arrival.append(self.env.now)
 
         self.num_serviced += 1
@@ -34,6 +35,7 @@ class Queue:
         self.update_stats()
 
         with self.server.request() as request:
+            print(f"Requesting at {self.env.now}, {self.mu}")
             yield request
 
             self.total_delay += self.env.now - self.times_of_arrival.pop(0)
@@ -42,7 +44,9 @@ class Queue:
             self.update_stats()
 
             service_time = random.expovariate(self.mu)
+            print(f"Service Time: {service_time}, {self.env.now}")
             yield self.env.timeout(service_time)
+            print(f"Finished at {self.env.now}, {self.mu}")
             self.service_times.append(service_time)
 
             self.update_stats()
@@ -68,6 +72,7 @@ class Customer:
     def process(self):
         while True:
             inter_arrival_time = random.expovariate(self.config.arrival_rate)
+            print(f"Interarrival Time: {inter_arrival_time}, {self.env.now}")
             yield self.env.timeout(inter_arrival_time)
             yield self.env.process(self.queues["1"].process())
 
